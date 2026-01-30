@@ -1,0 +1,37 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "Universal Python Project",
+    "image": "mcr.microsoft.com/devcontainers/universal:2",
+
+    // We no longer need the "features" block for Docker or uv 
+    // because they are native to this image.
+    "features": {},
+	
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "echo 'export PS1=\"\\W \\$ \"' >> ~/.bashrc",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"charliermarsh.ruff"
+			],
+			"settings": {
+				"editor.defaultFormatter": "charliermarsh.ruff",
+				"editor.formatOnSave": true,
+				"editor.codeActionsOnSave": {
+					"source.fixAll.ruff": "explicit",
+					"source.organizeImports.ruff": "explicit"
+				},
+				"ruff.nativeServer": true,
+			}
+		}
+	}
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
