@@ -1,0 +1,4 @@
+{
+    "sqltools.useNodeRuntime": true,
+    "dbt.enableNewLineagePanel": true
+}
