@@ -1,22 +1,53 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
-	"name": "Universal Python Project",
-	"image": "mcr.microsoft.com/devcontainers/universal:2",
-	// We no longer need the "features" block for Docker or uv 
-	// because they are native to this image.
-	"features": {},
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pip install uv && echo 'export PS1=\"\\W \\$ \"' >> ~/.bashrc",
-	// Configure tool-specific properties.
+	"name": "hw4-devcontainer",
+	"image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+	"features": {
+		"ghcr.io/dhoeric/features/google-cloud-cli:1": {},
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": true,
+			"configureZshAsDefaultShell": true,
+			"installOhMyZsh": true,
+			"installOhMyZshConfig": true,
+			"upgradePackages": true,
+			"installSsl": true,
+			"username": "devcontainer",
+			"userUid": "automatic",
+			"userGid": "automatic"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"moby": true,
+			"azureDnsAutoDetection": true,
+			"installDockerBuildx": true,
+			"version": "latest",
+			"dockerDashComposeVersion": "v2"
+		},
+		"ghcr.io/devcontainers/features/git-lfs:1": {
+			"autoPull": true,
+			"version": "latest"
+		},
+		"ghcr.io/devcontainer-community/devcontainer-features/astral.sh-uv:1": {
+			"shellautocompletion": true,
+			"version": "latest"
+		}
+	},
+	"postCreateCommand": "uv sync --frozen && gcloud --version && echo 'export PS1=\"\\W \\$ \"' >> ~/.bashrc",
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"charliermarsh.ruff"
+				"ms-python.python", // Required for dbt Power User to find Python
+				"astral-sh.uv", // Native uv support
+				"innoverio.vscode-dbt-power-user", // The "Power User for dbt" Extension ID
+				"charliermarsh.ruff", // Highly recommended for uv users/Python linting
+				"mechatroner.rainbow-csv" // Optional but helpful for CSV files
 			],
 			"settings": {
+				"python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+				// Forces dbt Power User to use the same venv
+				"dbt.dbtPythonPathOverride": "${workspaceFolder}/.venv/bin/python",
+				// Optional: Ensure the terminal uses the venv by default
+				"python.terminal.activateEnvInSelectedTerminal": true,
+				"dbt.dbtIntegration": "core",
+				"dbt.profilesDir": "${workspaceFolder}",
 				"editor.defaultFormatter": "charliermarsh.ruff",
 				"editor.formatOnSave": true,
 				"editor.codeActionsOnSave": {
