@@ -23,7 +23,7 @@
 					"source.fixAll.ruff": "explicit",
 					"source.organizeImports.ruff": "explicit"
 				},
-				"ruff.nativeServer": true,
+				"ruff.nativeServer": true
 			}
 		}
 	}
