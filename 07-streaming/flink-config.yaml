@@ -8,10 +8,17 @@
 blob:
   server:
     port: '6124'
+execution:
+  checkpointing:
+    storage: filesystem
+    dir: file:///opt/flink/checkpoints  # Ensure this directory exists and is writable
+state:
+  checkpoints:
+    dir: file:///opt/flink/checkpoints
 taskmanager:
   memory:
     process:
-      size: 1728m
+      size: 4g
     jvm-metaspace:
       size: 512m  # added for PyFlink
   bind-host: 0.0.0.0

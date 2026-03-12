@@ -29,16 +29,6 @@ services:
       - 28082:28082
       - 29092:29092
 
-  postgres:
-    image: postgres:18
-    restart: on-failure
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
-
   jobmanager:
     build:
       context: .
@@ -52,12 +42,16 @@ services:
     volumes:
       - ./:/opt/flink/usrlib
       - ./src/:/opt/src
+      - ./checkpoints:/opt/flink/checkpoints # Mount local folder to container
     command: jobmanager
     environment:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         jobmanager.memory.process.size: 1600m
+        execution.checkpointing.storage: filesystem
+        execution.checkpointing.dir: file:///opt/flink/checkpoints
+        state.checkpoints.dir: file:///opt/flink/checkpoints
 
   taskmanager:
     image: pyflink-workshop
@@ -68,6 +62,7 @@ services:
     volumes:
       - ./:/opt/flink/usrlib
       - ./src/:/opt/src
+      - ./checkpoints:/opt/flink/checkpoints # Must be the same path as jobmanager
     depends_on:
       - jobmanager
     command: taskmanager --taskmanager.registration.timeout 5 min
@@ -75,6 +70,19 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.memory.process.size: 8000m
+        taskmanager.memory.process.size: 1728m
         taskmanager.numberOfTaskSlots: 15
         parallelism.default: 3
+        execution.checkpointing.storage: filesystem
+        execution.checkpointing.dir: file:///opt/flink/checkpoints
+        state.checkpoints.dir: file:///opt/flink/checkpoints
+
+  postgres:
+    image: postgres:18
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"

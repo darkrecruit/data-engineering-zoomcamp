@@ -7,7 +7,7 @@ def create_events_source_kafka(t_env):
     source_ddl = f"""
         CREATE TABLE {table_name} (
             lpep_pickup_datetime VARCHAR,
-            PULocationID INTEGER,
+            tip_amount DOUBLE,
             event_timestamp AS TO_TIMESTAMP(lpep_pickup_datetime, 'yyyy-MM-dd HH:mm:ss'),
             WATERMARK for event_timestamp as event_timestamp - INTERVAL '5' SECOND
         ) WITH (
@@ -24,19 +24,17 @@ def create_events_source_kafka(t_env):
 
 
 def create_events_aggregated_sink(t_env):
-    table_name = 'processed_events_sessioned'
+    table_name = 'processed_events_tumbling'
     sink_ddl = f"""
         CREATE TABLE {table_name} (
             window_start TIMESTAMP(3),
-            window_end TIMESTAMP(3),
-            PULocationID INT,
-            num_trips BIGINT,
-            PRIMARY KEY (window_start, window_end, PULocationID) NOT ENFORCED
+            tip_amount DOUBLE,
+            PRIMARY KEY (window_start) NOT ENFORCED
         ) WITH (
             'connector' = 'jdbc',
             'url' = 'jdbc:postgresql://postgres:5432/postgres',
             'table-name' = '{table_name}',
-            'username' = 'postgres',q
+            'username' = 'postgres',
             'password' = 'postgres',
             'driver' = 'org.postgresql.Driver'
         );
@@ -61,13 +59,11 @@ def log_aggregation():
         INSERT INTO {aggregated_table}
         SELECT
             window_start,
-            window_end,
-            PULocationID,
-            COUNT(1) AS num_trips
+            SUM(tip_amount) AS tip_amount
         FROM TABLE(
-            SESSION(TABLE {source_table}, DESCRIPTOR(event_timestamp), INTERVAL '5' MINUTE)
+            TUMBLE(TABLE {source_table}, DESCRIPTOR(event_timestamp), INTERVAL '1' HOUR)
         )
-        GROUP BY window_start, window_end, PULocationID;
+        GROUP BY window_start;
 
         """).wait()
 
