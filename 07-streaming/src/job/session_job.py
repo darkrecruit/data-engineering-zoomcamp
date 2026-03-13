@@ -36,7 +36,7 @@ def create_events_aggregated_sink(t_env):
             'connector' = 'jdbc',
             'url' = 'jdbc:postgresql://postgres:5432/postgres',
             'table-name' = '{table_name}',
-            'username' = 'postgres',q
+            'username' = 'postgres',
             'password' = 'postgres',
             'driver' = 'org.postgresql.Driver'
         );
@@ -65,7 +65,7 @@ def log_aggregation():
             PULocationID,
             COUNT(1) AS num_trips
         FROM TABLE(
-            SESSION(TABLE {source_table}, DESCRIPTOR(event_timestamp), INTERVAL '5' MINUTE)
+            SESSION(TABLE {source_table} PARTITION BY PULocationID, DESCRIPTOR(event_timestamp), INTERVAL '5' MINUTE)
         )
         GROUP BY window_start, window_end, PULocationID;
 
